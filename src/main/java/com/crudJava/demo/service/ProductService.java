@@ -4,12 +4,10 @@ import com.crudJava.demo.dto.request.ProductCreateRequestDTO;
 import com.crudJava.demo.dto.response.ProductDetailResponseDTO;
 import com.crudJava.demo.entity.Product;
 import lombok.Setter;
-import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.condition.ProducesRequestCondition;
 
 import java.util.List;
 
-@Service
 public interface ProductService {
 
     public  ProductDetailResponseDTO editProductById(Long id, Product dataToEdit);

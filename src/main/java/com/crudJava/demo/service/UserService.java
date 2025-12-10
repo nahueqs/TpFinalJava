@@ -4,6 +4,8 @@ import com.crudJava.demo.dto.response.UserResponseDTO;
 import com.crudJava.demo.entity.User;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public interface UserService {
 
@@ -19,5 +21,5 @@ public interface UserService {
 
     void deleteUser(Long id);
 
-    UserResponseDTO getAll();
+    List<UserResponseDTO> getAll();
 }

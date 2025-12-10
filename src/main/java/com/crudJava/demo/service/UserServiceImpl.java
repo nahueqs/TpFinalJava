@@ -6,6 +6,9 @@ import com.crudJava.demo.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl implements  UserService{
@@ -44,12 +47,15 @@ public class UserServiceImpl implements  UserService{
     }
 
     @Override
-    public UserResponseDTO getAll() {
+    public List<UserResponseDTO> getAll() {
+
+        System.out.println(userRepository.findAll());
+
         return userRepository.findAll().stream().map(
                 user -> new UserResponseDTO(
                         user.getId(),
                         user.getName(),
                         user.getEmail()
-                )).toList().get(0);
+                )).collect(Collectors.toList());
     }
 }

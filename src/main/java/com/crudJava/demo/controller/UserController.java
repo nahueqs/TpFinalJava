@@ -3,10 +3,11 @@ package com.crudJava.demo.controller;
 import com.crudJava.demo.dto.response.UserResponseDTO;
 import com.crudJava.demo.service.UserService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
-@Controller
+import java.util.List;
+
+@RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/users")
 public class UserController {
@@ -19,7 +20,8 @@ public class UserController {
     }
 
     @GetMapping
-    UserResponseDTO getAllUsers(){
+    List<UserResponseDTO> getAllUsers(){
+        System.out.println(userService.getAll());
         return userService.getAll();
     }
 
