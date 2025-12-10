@@ -3,13 +3,22 @@ package com.crudJava.demo.controller;
 
 import com.crudJava.demo.dto.request.ProductCreateRequestDTO;
 import com.crudJava.demo.dto.response.ProductDetailResponseDTO;
+import com.crudJava.demo.service.ProductService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.*;
 
-@Controller("/api/products")
+@Controller
+@RequiredArgsConstructor
+@RequestMapping("/api/products")
 public class ProductController {
+
+    private final ProductService productService;
+
+    @GetMapping()
+    ProductDetailResponseDTO getAllProducts(){
+        return null;
+    }
 
     @GetMapping("/{id}")
     ProductDetailResponseDTO getProductById(@PathVariable Long id){
@@ -17,14 +26,22 @@ public class ProductController {
     }
 
     @PostMapping()
-    ProductCreateResponseDTO createProduct(ProductCreateRequestDTO productCreateRequestDTO){
+    ProductDetailResponseDTO createProduct(ProductCreateRequestDTO productCreateRequestDTO){
         return null;
     }
 
-    @PostMapping("/{id}")
-    ProductDeleteResponseDTO deleteProduct(Long id){
-        return null;
+    @DeleteMapping("/{id}")
+    void deleteProduct(@PathVariable Long id){
+
+
     }
+
+    @PutMapping
+    void updateProduct(){
+
+    }
+
+
 
 
 
