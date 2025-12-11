@@ -98,7 +98,9 @@ public class CartServiceImpl implements CartService{
 
     private CartResponseDTO toCartResponseDTO(Cart model){
         return new CartResponseDTO(
+                model.getId(),
                 model.getUser().getId(),
+                model.getStatus().toString(),
                 productCartListToResponseDTOList(model.getProductCarts())
         );
     }

@@ -34,11 +34,6 @@ public class CartController {
         return null;
     }
 
-    @PutMapping("/{id}")
-    public CartResponseDTO updateCart(@PathVariable String id){
-        return null;
-    }
-
     @GetMapping("/{id}")
     public CartResponseDTO getCart(@PathVariable String id){
         return null;
