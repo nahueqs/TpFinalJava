@@ -1,26 +1,28 @@
 package com.crudJava.demo.service;
 
+import com.crudJava.demo.dto.request.CartCreateRequestDTO;
 import com.crudJava.demo.dto.request.CartStatusChangeRequestDTO;
+import com.crudJava.demo.dto.request.ProductCartRequestDTO;
 import com.crudJava.demo.dto.response.CartResponseDTO;
 import com.crudJava.demo.dto.response.ProductCartResponseDTO;
 import com.crudJava.demo.dto.response.ProductDetailResponseDTO;
 import com.crudJava.demo.entity.Cart;
 import com.crudJava.demo.entity.Product;
 import com.crudJava.demo.entity.ProductCart;
+import com.crudJava.demo.entity.User;
 import com.crudJava.demo.enums.CartStatus;
 import com.crudJava.demo.exceptions.CantidadPedidoInvalidaException;
 import com.crudJava.demo.exceptions.ProductoNoEstaEnPedidoException;
-import com.crudJava.demo.exceptions.ProductoYaEnCarrito;
 import com.crudJava.demo.exceptions.RecursosInexistenteException;
 import com.crudJava.demo.repository.CartRepository;
 import com.crudJava.demo.repository.ProductCartRepository;
+import com.crudJava.demo.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-
-import static java.util.spi.ToolProvider.findFirst;
 
 @Service
 @RequiredArgsConstructor
@@ -29,41 +31,64 @@ public class CartServiceImpl implements CartService{
     private final CartRepository cartRepository;
     private final ProductService productService;
     private final ProductCartRepository productCartRepository;
+    private final UserService userService;
+    private final ProductRepository productRepository;
 
 
     @Override
-    public CartResponseDTO createCart() {
-        return null;
+    public CartResponseDTO createCart(CartCreateRequestDTO request) {
+        User user = userService.findModelById(request.idUser());
+        Cart cart = new Cart();
+        cart.setUser(user);
+        cart.setStatus(CartStatus.PENDING);
+        cart.setProductCarts(new ArrayList<>());
+
+        Cart savedCart = cartRepository.save(cart);
+
+        if (request.productCartRequestDTOList() != null && !request.productCartRequestDTOList().isEmpty()) {
+            List<ProductCart> productCarts = new ArrayList<>();
+            for (ProductCartRequestDTO productRequest : request.productCartRequestDTOList()) {
+                if (productRequest.quantity() <= 0) {
+                    throw new CantidadPedidoInvalidaException("La cantidad debe ser mayor a cero.");
+                }
+                Product product = productService.getProductModelById(productRequest.productID());
+                ProductCart productCart = new ProductCart();
+                productCart.setCart(savedCart);
+                productCart.setProduct(product);
+                productCart.setQuantity(productRequest.quantity());
+                productCarts.add(productCart);
+            }
+            productCartRepository.saveAll(productCarts);
+            savedCart.setProductCarts(productCarts);
+        }
+
+        return toCartResponseDTO(savedCart);
     }
 
     @Override
     public void deleteCart(Long id) {
-
+        cartRepository.deleteById(id);
     }
 
     @Override
-    public CartResponseDTO updateProductInCart(Long cartId, Long productId, Integer quantity) {
-        if (quantity < 0) {
+    public CartResponseDTO updateProductInCart(Long cartId, ProductCartRequestDTO request) {
+        if (request.quantity() < 0) {
             throw new CantidadPedidoInvalidaException("La cantidad del producto no puede ser negativa.");
         }
 
         Cart existingCart = findModelbyId(cartId);
 
-        // Check if product is already in cart using the corrected method
-        if (!productAlreadyInCart(existingCart, productId)) {
+        if (!productAlreadyInCart(existingCart, request.productID())) {
             throw new ProductoNoEstaEnPedidoException("El producto no está en el carrito");
         }
 
-        // Find the existing ProductCart entry
         ProductCart productCart = existingCart.getProductCarts().stream()
-                .filter(pc -> pc.getProduct().getId().equals(productId))
+                .filter(pc -> pc.getProduct().getId().equals(request.productID()))
                 .findFirst()
                 .orElseThrow(() -> new ProductoNoEstaEnPedidoException("El producto no está en el carrito"));
 
-        // Update quantity
-        productCart.setQuantity(quantity);
+        productCart.setQuantity(request.quantity());
 
-        // Save the ProductCart entity
         productCartRepository.save(productCart);
 
         return toCartResponseDTO(existingCart);
@@ -130,32 +155,28 @@ public class CartServiceImpl implements CartService{
     }
 
     @Override
-    public CartResponseDTO addProductToCart(Long cartId, Long productId, Integer quantity) {
-        if (quantity <= 0) {
+    public CartResponseDTO addProductToCart(Long cartId, ProductCartRequestDTO request) {
+        if (request.quantity() <= 0) {
             throw new CantidadPedidoInvalidaException("La cantidad debe ser mayor a cero.");
         }
 
         Cart existingCart = findModelbyId(cartId);
-        Product producto = productService.getProductModelById(productId);
+        Product producto = productService.getProductModelById(request.productID());
 
-        Optional<ProductCart> existingProductCart = findProductInCart(existingCart, productId);
+        Optional<ProductCart> existingProductCart = findProductInCart(existingCart, request.productID());
 
         if (existingProductCart.isPresent()) {
-            // Update existing product quantity
             ProductCart productCart = existingProductCart.get();
-            productCart.setQuantity(productCart.getQuantity() + quantity);
+            productCart.setQuantity(productCart.getQuantity() + request.quantity());
             productCartRepository.save(productCart);
         } else {
-            // Create new ProductCart entry
             ProductCart newProductCart = new ProductCart();
             newProductCart.setCart(existingCart);
             newProductCart.setProduct(producto);
-            newProductCart.setQuantity(quantity);
+            newProductCart.setQuantity(request.quantity());
 
-            // Save the ProductCart first
             productCartRepository.save(newProductCart);
 
-            // Add to cart's list
             existingCart.getProductCarts().add(newProductCart);
         }
 
@@ -168,10 +189,21 @@ public class CartServiceImpl implements CartService{
     public CartResponseDTO changeStatusCart(Long cartId, CartStatusChangeRequestDTO cartStatusChangeRequestDTO) {
 
         Cart cart = findModelbyId(cartId);
+        CartStatus newStatus = CartStatus.fromString(cartStatusChangeRequestDTO.status());
 
+        if (newStatus == CartStatus.COMPLETED) {
+            for (ProductCart productCart : cart.getProductCarts()) {
+                Product product = productCart.getProduct();
+                int newStock = product.getStock() - productCart.getQuantity();
+                if (newStock < 0) {
+                    throw new CantidadPedidoInvalidaException("No hay stock suficiente para el producto: " + product.getName());
+                }
+                product.setStock(newStock);
+                productRepository.save(product);
+            }
+        }
 
-        cart.setStatus(CartStatus.fromString(cartStatusChangeRequestDTO.status()));
-
+        cart.setStatus(newStatus);
         cartRepository.save(cart);
         return toCartResponseDTO(cart);
 
@@ -179,7 +211,8 @@ public class CartServiceImpl implements CartService{
 
     @Override
     public List<CartResponseDTO> getAllCartsByUser(Long userId) {
-        return List.of();
+        User user = userService.findModelById(userId);
+        return toCartResponseDTOList(user.getCarts());
     }
 
     @Override

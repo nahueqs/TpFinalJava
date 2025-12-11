@@ -114,4 +114,11 @@ public class UserServiceImpl implements  UserService{
                         user.getEmail()
                 )).collect(Collectors.toList());
     }
+
+    @Override
+    public User findModelById(Long aLong) {
+        return userRepository.findById(aLong).orElseThrow(
+                () -> new UsuarioInexistenteException("El usuario no existe")
+        );
+    }
 }

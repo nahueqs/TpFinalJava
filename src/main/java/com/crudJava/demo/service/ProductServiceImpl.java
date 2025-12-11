@@ -23,8 +23,9 @@ public class ProductServiceImpl implements  ProductService {
         Product product = getProductModelById(id);
         product.setName(dataToEdit.name());
         product.setDesc(dataToEdit.desc());
-        product.setPrice(Double.valueOf(dataToEdit.price()));
-        product.setCategory(dataToEdit.categoryId().intValue());
+        product.setPrice((double) dataToEdit.price());
+        product.setCategory(dataToEdit.categoryId());
+        product.setStock(dataToEdit.stock());
         productRepository.save(product);
         return toProductDetailResponseDTO(product);
     }
@@ -43,6 +44,7 @@ public class ProductServiceImpl implements  ProductService {
         product.setDesc(productRequest.desc());
         product.setPrice(Double.valueOf(productRequest.price()));
         product.setCategory(productRequest.categoryId().intValue());
+        product.setStock(productRequest.stock());
         productRepository.save(product);
         return toProductDetailResponseDTO(product);
     }

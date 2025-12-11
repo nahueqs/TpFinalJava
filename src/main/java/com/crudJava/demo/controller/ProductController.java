@@ -8,6 +8,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/products")
@@ -16,29 +18,29 @@ public class ProductController {
     private final ProductService productService;
 
     @GetMapping()
-    ProductDetailResponseDTO getAllProducts(){
-        return null;
+    List<ProductDetailResponseDTO> getAllProducts(){
+        return productService.getAllProducts();
     }
 
     @GetMapping("/{id}")
     ProductDetailResponseDTO getProductById(@PathVariable Long id){
-        return null;
+        return productService.getProductByID(id);
     }
 
     @PostMapping()
-    ProductDetailResponseDTO createProduct(ProductCreateRequestDTO productCreateRequestDTO){
-        return null;
+    ProductDetailResponseDTO createProduct(@RequestBody ProductCreateRequestDTO productCreateRequestDTO){
+        return productService.createProduct(productCreateRequestDTO);
     }
 
     @DeleteMapping("/{id}")
     void deleteProduct(@PathVariable Long id){
-
+        productService.deleteProductById(id);
 
     }
 
-    @PutMapping
-    void updateProduct(){
-
+    @PutMapping("/{id}")
+    ProductDetailResponseDTO updateProduct(@RequestBody ProductCreateRequestDTO request, @PathVariable Long id){
+       return productService.editProductById(id, request);
     }
 
 

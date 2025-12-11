@@ -4,7 +4,8 @@ public enum CartStatus {
 
     PENDING,
     FAILED,
-    COMPLETED;
+    COMPLETED,
+    CANCELLED;
 
 
     public static CartStatus fromString(String status) {

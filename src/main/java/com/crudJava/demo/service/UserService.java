@@ -2,6 +2,7 @@ package com.crudJava.demo.service;
 
 import com.crudJava.demo.dto.request.UserCreateRequestDTO;
 import com.crudJava.demo.dto.response.UserResponseDTO;
+import com.crudJava.demo.entity.User;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -22,4 +23,6 @@ public interface UserService {
     void deleteUser(Long id);
 
     List<UserResponseDTO> getAll();
+
+    User findModelById(Long aLong);
 }

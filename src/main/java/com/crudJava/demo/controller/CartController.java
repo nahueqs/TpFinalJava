@@ -1,7 +1,9 @@
 package com.crudJava.demo.controller;
 
 
+import com.crudJava.demo.dto.request.CartCreateRequestDTO;
 import com.crudJava.demo.dto.request.CartStatusChangeRequestDTO;
+import com.crudJava.demo.dto.request.ProductCartRequestDTO;
 import com.crudJava.demo.dto.response.CartResponseDTO;
 import com.crudJava.demo.service.CartService;
 import lombok.RequiredArgsConstructor;
@@ -25,34 +27,38 @@ public class CartController {
     }
 
     @PostMapping()
-    public CartResponseDTO createCart(){
-        return null;
+    public CartResponseDTO createCart(@RequestBody CartCreateRequestDTO request){
+        return cartService.createCart(request);
     }
 
     @DeleteMapping("/{id}")
-    public CartResponseDTO deleteCart(@PathVariable String id){
-        return null;
+    public void deleteCart(@PathVariable Long id){
+         cartService.deleteCart(id);
     }
 
     @GetMapping("/{id}")
-    public CartResponseDTO getCart(@PathVariable String id){
-        return null;
+    public CartResponseDTO getCart(@PathVariable Long id){
+        return cartService.getCart(id);
     }
 
 
-    @PostMapping("/{cartId}/{productId}")
-    public CartResponseDTO addProductToCart(){
-        return null;
+    @PostMapping("/{cartId}/add")
+    public CartResponseDTO addProductToCart(@PathVariable Long cartId, @RequestBody ProductCartRequestDTO request){
+        return cartService.addProductToCart(cartId, request );
     }
 
-    @PutMapping("/{cartId}/{productId}")
-    public CartResponseDTO updateProductOnCart(){
-        return null;
+    @PutMapping("/{cartId}/update")
+    public CartResponseDTO updateProductOnCart(@PathVariable Long cartId, @RequestBody ProductCartRequestDTO request){
+        return cartService.updateProductInCart(cartId, request );
     }
 
     @PutMapping("/{id}/status")
-    public CartResponseDTO changeStatus(@PathVariable Long id, CartStatusChangeRequestDTO request){
-        return null;
+    public CartResponseDTO changeStatus(@PathVariable Long id, @RequestBody CartStatusChangeRequestDTO request){
+        return cartService.changeStatusCart(id, request);
     }
 
+    @GetMapping("/users/{id}")
+    public List<CartResponseDTO> getCartsByUser(@PathVariable Long id) {
+        return cartService.getAllCartsByUser(id);
+    }
 }

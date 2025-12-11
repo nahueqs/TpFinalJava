@@ -6,6 +6,7 @@ public record ProductCreateRequestDTO(
         String name,
         String desc,
         float price,
-        Long categoryId
+        Integer categoryId,
+        Integer stock
 ) {
 }
