@@ -1,5 +1,6 @@
 package com.crudJava.demo.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -25,6 +26,7 @@ public class User {
     @Column(unique = true)
     private String email;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "user")
     private List<Cart> carts;
 

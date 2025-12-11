@@ -1,5 +1,6 @@
 package com.crudJava.demo.controller;
 
+import com.crudJava.demo.dto.request.UserCreateRequestDTO;
 import com.crudJava.demo.dto.response.UserResponseDTO;
 import com.crudJava.demo.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -15,8 +16,8 @@ public class UserController {
     private final UserService userService;
 
     @PostMapping
-    UserResponseDTO createUser(){
-        return null;
+    UserResponseDTO createUser(UserCreateRequestDTO request){
+        return userService.createUser(request);
     }
 
     @GetMapping
@@ -26,18 +27,29 @@ public class UserController {
     }
 
     @GetMapping("/{id}")
-    UserResponseDTO getUserById(){
-        return null;
+    UserResponseDTO getUserById(@PathVariable Long id){
+        return userService.findUserById(id);
+    }
+
+    @GetMapping("/email/{email}")
+    UserResponseDTO getUserByEmail(@PathVariable String email){
+        return userService.findUserByEmail(email);
+    }
+
+
+    @GetMapping("/name/{name}")
+    List<UserResponseDTO> getUserByName(@PathVariable String name){
+        return userService.findUserByName(name);
     }
 
     @PutMapping("/{id}")
-    UserResponseDTO updateUser(){
-        return null;
+    UserResponseDTO updateUser(@PathVariable Long id, UserCreateRequestDTO request){
+        return userService.updateUser(id, request);
     }
 
     @DeleteMapping("/{id}")
-    UserResponseDTO deleteUser(){
-        return null;
+    void deleteUser(@PathVariable Long id){
+        userService.deleteUser(id);
     }
 
 

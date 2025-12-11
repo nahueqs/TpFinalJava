@@ -4,7 +4,7 @@ public record ProductDetailResponseDTO(
         Long productId,
         String name,
         String desc,
-        float price,
+        double price,
         Integer category,
         Integer stock
 ) {
